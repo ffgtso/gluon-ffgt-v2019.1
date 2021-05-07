@@ -1,3 +1,0 @@
-device('avm-fritz-box-7360sl', 'avm_fritz7360sl', {
-	factory = false,
-})
