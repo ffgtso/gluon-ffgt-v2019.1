@@ -82,6 +82,7 @@ local function get_htmode(radio)
 	        config_htmode="HT40+"
 	    fi
 	    uci:set('gluon', 'wireless', radio['.name'] .. '_htmode', config_htmode)
+        uci:save('gluon')
 	end
 
 --	local phy = util.find_phy(radio)
