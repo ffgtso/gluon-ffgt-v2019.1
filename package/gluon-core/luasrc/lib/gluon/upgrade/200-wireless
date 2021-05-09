@@ -77,10 +77,10 @@ local function get_htmode(radio)
 	    return config_htmode
 	else
 		if radio.hwmode == '11a' or radio.hwmode == '11na' then
-			uci:set('gluon', 'wireless', radio['.name'] .. '_htmode', "VHT40+")
-			config_htmode="VHT40+"
+			uci:set('gluon', 'wireless', radio['.name'] .. '_htmode', "VHT20")
+			config_htmode="VHT20"
 		else
-			uci:set('gluon', 'wireless', radio['.name'] .. '_htmode', "HT40+")
+			uci:set('gluon', 'wireless', radio['.name'] .. '_htmode', "HT20")
 			config_htmode="HT20"
 		end
 		uci:save('gluon')
