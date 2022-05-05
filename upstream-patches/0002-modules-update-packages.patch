@@ -1,0 +1,115 @@
+From fd5706c55510053b4260af84c44259f75a66dfbb Mon Sep 17 00:00:00 2001
+From: Martin Weinelt <martin@darmstadt.freifunk.net>
+Date: Tue, 17 Nov 2020 02:32:14 +0100
+Subject: [PATCH] modules: update packages
+
+65e919996 haproxy: Update HAProxy to v1.8.27
+3325a3ce0 php7: update to 7.2.34
+a72e95a2f fastd: fix buffer leak when receiving invalid packets
+34353f2e8 Merge pull request #13685 from jefferyto/python-3.6.12-openwrt-18.06
+5d988670c python3: Update to 3.6.12, remove backported patches
+46e05d87b simple-adblock: config update file fix
+8579739f2 nano: update to 5.3
+026055077 Merge pull request #13550 from gladiac1337/haproxy-1.8.26-openwrt-18.06
+16f1b537b haproxy: Update HAProxy to v1.8.26
+dc09a3791 vpnbypass: README update, code cleanup
+82f833312 Merge pull request #13435 from stangri/18.06-simple-adblock
+b7c198b3e simple-adblock: add config auto-update feature
+a359b1b3b php7: update to 7.2.33
+0ad7b4af0 nano: update to 5.2
+---
+ modules                                       |  2 +-
+ ...-leak-when-receiving-invalid-packets.patch | 68 -------------------
+ 2 files changed, 1 insertion(+), 69 deletions(-)
+ delete mode 100644 patches/packages/packages/0002-fastd-fix-buffer-leak-when-receiving-invalid-packets.patch
+
+diff --git a/modules b/modules
+index d1a6ea88..85dba15a 100644
+--- a/modules
++++ b/modules
+@@ -6,7 +6,7 @@ OPENWRT_COMMIT=6d94a6eca41da34f4df845d9876be2acfbf5881f
+ 
+ PACKAGES_PACKAGES_REPO=https://github.com/openwrt/packages.git
+ PACKAGES_PACKAGES_BRANCH=openwrt-18.06
+-PACKAGES_PACKAGES_COMMIT=b2978d83db29693c00ed44547ab2967a764ef899
++PACKAGES_PACKAGES_COMMIT=65e91999666573eac2d9d57ed4ecadac029cf8f3
+ 
+ PACKAGES_ROUTING_REPO=https://github.com/openwrt-routing/packages.git
+ PACKAGES_ROUTING_BRANCH=openwrt-18.06
+diff --git a/patches/packages/packages/0002-fastd-fix-buffer-leak-when-receiving-invalid-packets.patch b/patches/packages/packages/0002-fastd-fix-buffer-leak-when-receiving-invalid-packets.patch
+deleted file mode 100644
+index 112505ce..00000000
+--- a/patches/packages/packages/0002-fastd-fix-buffer-leak-when-receiving-invalid-packets.patch
++++ /dev/null
+@@ -1,68 +0,0 @@
+-From: Matthias Schiffer <mschiffer@universe-factory.net>
+-Date: Mon, 19 Oct 2020 22:09:34 +0200
+-Subject: fastd: fix buffer leak when receiving invalid packets
+-
+-Signed-off-by: Matthias Schiffer <mschiffer@universe-factory.net>
+-(cherry picked from commit a72e95a2f450a42f59984135ce6239289d1d3a5a)
+-
+-diff --git a/net/fastd/Makefile b/net/fastd/Makefile
+-index 2686c7fb9a453649ce4da66329fbd182b14cae5f..70df5c20aa17e782090a880358922d4b13c69437 100644
+---- a/net/fastd/Makefile
+-+++ b/net/fastd/Makefile
+-@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
+- 
+- PKG_NAME:=fastd
+- PKG_VERSION:=18
+--PKG_RELEASE:=2.1
+-+PKG_RELEASE:=2.2
+- 
+- PKG_MAINTAINER:=Matthias Schiffer <mschiffer@universe-factory.net>
+- PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+-diff --git a/net/fastd/patches/0003-receive-fix-buffer-leak-when-receiving-invalid-packe.patch b/net/fastd/patches/0003-receive-fix-buffer-leak-when-receiving-invalid-packe.patch
+-new file mode 100644
+-index 0000000000000000000000000000000000000000..b67a85c4e4f8ca1ef72d3216afa1ad4e9370cd02
+---- /dev/null
+-+++ b/net/fastd/patches/0003-receive-fix-buffer-leak-when-receiving-invalid-packe.patch
+-@@ -0,0 +1,42 @@
+-+From f6a2651fa91c472d04cb34264718f761669c8aa1 Mon Sep 17 00:00:00 2001
+-+Message-Id: <f6a2651fa91c472d04cb34264718f761669c8aa1.1603136280.git.mschiffer@universe-factory.net>
+-+From: Matthias Schiffer <mschiffer@universe-factory.net>
+-+Date: Mon, 19 Oct 2020 21:08:16 +0200
+-+Subject: [PATCH] receive: fix buffer leak when receiving invalid packets
+-+
+-+For fastd versions before v20, this was just a memory leak (which could
+-+still be used for DoS, as it's remotely triggerable). With the new
+-+buffer management of fastd v20, this will trigger an assertion failure
+-+instead as soon as the buffer pool is empty.
+-+
+-+(cherry picked from commit 737925113363b6130879729cdff9ccc46c33eaea)
+-+---
+-+ src/receive.c | 10 ++++++++++
+-+ 1 file changed, 10 insertions(+)
+-+
+-+--- a/src/receive.c
+-++++ b/src/receive.c
+-+@@ -186,6 +186,11 @@ static inline void handle_socket_receive
+-+ 
+-+ 	case PACKET_HANDSHAKE:
+-+ 		fastd_handshake_handle(sock, local_addr, remote_addr, peer, buffer);
+-++		break;
+-++
+-++	default:
+-++		fastd_buffer_free(buffer);
+-++		pr_debug("received packet with invalid type from %P[%I]", peer, remote_addr);
+-+ 	}
+-+ }
+-+ 
+-+@@ -211,6 +216,11 @@ static inline void handle_socket_receive
+-+ 
+-+ 	case PACKET_HANDSHAKE:
+-+ 		fastd_handshake_handle(sock, local_addr, remote_addr, NULL, buffer);
+-++		break;
+-++
+-++	default:
+-++		fastd_buffer_free(buffer);
+-++		pr_debug("received packet with invalid type from unknown address %I", remote_addr);
+-+ 	}
+-+ }
+-+ 
+-- 
+2.17.1
+

@@ -6,12 +6,11 @@ git checkout -b v2018.1.x
 # e. g.:
 # git log --format=oneline  # compare to ../gluon-ffgt-v2018.1
 # cut & paste the id to /tmp/7777
-# tac /tmp/7777 >/tmp/7777_ ; mv /tmp/7777_ /tmp/7777
 #
 # wusel@ysabell:/data/wusel/gluon-ffgt-v2018.1$ ls upstream-patches/applied/ | cut -d - -f 1 | tail -1 | sed 's/^0*//' | awk '{x=$1; printf("%04d\n", x+1);}'  
 # 0012
 # => n=12 below 
-n=(see above, e. g. 12); for i in $(cat /tmp/7777) ; do git format-patch --output-directory ../gluon-ffgt-v2018.2/upstream-patches --start-number $n -1 $i ; n=$(expr $n + 1); done
+n=(see above, e. g. 12); for i in $(tac /tmp/7777) ; do git format-patch --output-directory ../gluon-ffgt-v2018.2/upstream-patches --start-number $n -1 $i ; n=$(expr $n + 1); done
 cd ../gluon-ffgt-v2018.2/
 # commit & push
 cd upstream-patches/
